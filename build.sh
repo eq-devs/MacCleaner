@@ -1,9 +1,10 @@
 #!/bin/bash
 # Builds Mac Cleaner.app into ~/Applications (find it in Spotlight or Launchpad).
+# Pass a folder to build there instead: ./build.sh dist
 set -e
 cd "$(dirname "$0")"
 
-APP="$HOME/Applications/Mac Cleaner.app"
+APP="${1:-$HOME/Applications}/Mac Cleaner.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS"
 cp Info.plist "$APP/Contents/"
