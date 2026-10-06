@@ -18,13 +18,19 @@ jobs:
         run: |
           plutil -replace CFBundleShortVersionString -string "${GITHUB_REF_NAME#v}" Info.plist
           ./build.sh dist
-          ditto -c -k --keepParent "dist/Mac Cleaner.app" MacCleaner.zip
+          ln -s /Applications dist/Applications
+          # hdiutil sometimes fails with "Resource busy" on GitHub runners, so retry
+          for i in 1 2 3; do
+            hdiutil create -volname "Mac Cleaner" -srcfolder dist -ov -format UDZO MacCleaner.dmg && break
+            sleep 5
+          done
+          test -f MacCleaner.dmg
 
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" MacCleaner.zip --generate-notes --notes "Unzip and move **Mac Cleaner.app** to Applications.
+          gh release create "$GITHUB_REF_NAME" MacCleaner.dmg --generate-notes --notes "Open **MacCleaner.dmg** and drag **Mac Cleaner** onto **Applications**.
 
           The app is not notarized by Apple, so macOS blocks the first open. To allow it, try to open it once, then go to System Settings → Privacy & Security and click **Open Anyway**. Or run:
           \`\`\`
